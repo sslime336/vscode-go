@@ -67,6 +67,7 @@ import { GoExplorerProvider } from './goExplorer';
 import { GoExtensionContext } from './context';
 import * as commands from './commands';
 import { toggleVulncheckCommandFactory, VulncheckOutputLinkProvider } from './goVulncheck';
+import { MethodGenerationProvider, goGenerateMethod } from './goGenerateMethod';
 
 const goCtx: GoExtensionContext = {};
 
@@ -133,6 +134,12 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<ExtensionA
 	ctx.subscriptions.push(goCtx.lintDiagnosticCollection);
 	goCtx.vetDiagnosticCollection = vscode.languages.createDiagnosticCollection('go-vet');
 	ctx.subscriptions.push(goCtx.vetDiagnosticCollection);
+
+	const genStructMethodProvidor = vscode.languages.registerCodeActionsProvider('go', new MethodGenerationProvider(), {
+		providedCodeActionKinds: MethodGenerationProvider.providedCodeActionKinds
+	});
+	ctx.subscriptions.push(genStructMethodProvidor);
+	registerCommand('go.generate.method', goGenerateMethod);
 
 	registerCommand('go.gopath', commands.getCurrentGoPath);
 	registerCommand('go.goroot', commands.getCurrentGoRoot);
