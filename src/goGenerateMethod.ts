@@ -15,9 +15,9 @@ export const goGenerateMethod: CommandFactory = () => (
 		return;
 	}
 	const receiverName = getReceiverName(uncommontypeName);
-	let methodTpl = `\n\nfunc ($\{4:${receiverName}} *${uncommontypeName}) $\{1:methodName}($\{2}) {\n\t$\{3}\n}\n\n`;
+	let methodTpl = `\n\nfunc ($\{1:${receiverName}} *${uncommontypeName}) $\{2:methodName}($\{3}) {\n\t$\{4}\n}\n`;
 	if (!needPtrReceiver) {
-		methodTpl = `\n\nfunc ($\{4:${receiverName}} ${uncommontypeName}) $\{1:methodName}($\{2}) {\n\t$\{3}\n}\n\n`;
+		methodTpl = `\n\nfunc ($\{1:${receiverName}} ${uncommontypeName}) $\{2:methodName}($\{3}) {\n\t$\{4}\n}\n`;
 	}
 	editor.insertSnippet(new vscode.SnippetString(methodTpl), endPos);
 };
@@ -85,43 +85,28 @@ export class MethodGenerationProvider implements vscode.CodeActionProvider {
 	}
 
 	private async getUncommontypeName(lineText: string): Promise<string> {
-		// use regexp
-		// let regexp = /type [^0-9]\w+/;
-		if (lineText.indexOf('interface') !== -1 || lineText.indexOf('=') !== -1) {
+		const regexp = /type ([^0-9]\w+) [^0-9]\w+/;
+		const matches = lineText.match(regexp);
+		if (!matches) {
 			return '';
 		}
-		let trimedLineText = lineText.trim();
-		const braceIdx = trimedLineText.indexOf('{');
-		if (braceIdx !== -1) {
-			trimedLineText = trimedLineText.substring(0, braceIdx);
-		}
-		const fields = trimedLineText.split(' ');
-		if (fields.length < 2) {
-			return '';
-		}
-		let res = '';
-		if (fields.length === 2) {
-			res = fields[0];
-		}
-		res = fields[1];
-		return res;
+		return matches[1];
 	}
 }
 
 function getReceiverName(structName: string): string {
 	let res = '';
-	for (let i = 0; i < structName.length; i++) {
-		const ch = structName.charCodeAt(i);
-		if (isUpperCase(ch)) {
-			res += String.fromCharCode(ch + 32);
-		}
-	}
+	structName
+		.split('')
+		.filter((ch) => isUpperCase(ch))
+		.forEach((ch) => (res += ch.toLowerCase()));
 	if (res === '') {
 		res = structName.charAt(0).toLowerCase();
 	}
 	return res;
 }
 
-const isUpperCase = (ch: number): boolean => {
-	return 65 <= ch && ch <= 90;
+const isUpperCase = (ch: string): boolean => {
+	const c = ch.charCodeAt(0);
+	return 65 <= c && c <= 90;
 };
