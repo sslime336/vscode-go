@@ -15,9 +15,9 @@ export const goGenerateMethod: CommandFactory = () => (
 		return;
 	}
 	const receiverName = getReceiverName(uncommontypeName);
-	let methodTpl = `\n\nfunc ($\{1:${receiverName}} *${uncommontypeName}) $\{2:methodName}($\{3}) {\n\t$\{4}\n}\n`;
+	let methodTpl = `\n\nfunc ($\{1:${receiverName}} *${uncommontypeName}) $\{2:methodName}($3) $4 {\n\t$5\n}$0`;
 	if (!needPtrReceiver) {
-		methodTpl = `\n\nfunc ($\{1:${receiverName}} ${uncommontypeName}) $\{2:methodName}($\{3}) {\n\t$\{4}\n}\n`;
+		methodTpl = `\n\nfunc ($\{1:${receiverName}} ${uncommontypeName}) $\{2:methodName}($3) $4 {\n\t$5\n}$0`;
 	}
 	editor.insertSnippet(new vscode.SnippetString(methodTpl), endPos);
 };
